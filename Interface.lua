@@ -120,7 +120,7 @@ local ArrayFieldID = ""
 local KeySystemID = ""
 
 -- Interface Management
-local Rayfield = game.ReplicatedStorage.CosmHub:WaitForChild("ArrayField")
+local Rayfield = game:GetObjects("rbxassetid://13853811008")[1]
 
 Rayfield.Enabled = false
 -- Tasks
@@ -1202,7 +1202,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 		if not Passthrough then
 			local AttemptsRemaining = math.random(2,6)
-			local KeyUI = game.ReplicatedStorage.CosmHub:WaitForChild("Key")
+			local KeyUI = game:GetObjects("rbxassetid://11695805160")[1]
 			KeyUI.Enabled = true
 			pcall(function()
 				_G.KeyUI:Destroy()

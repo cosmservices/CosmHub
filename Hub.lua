@@ -198,4 +198,4 @@ local Button = DevTools:CreateButton({
 })
 
 -- FUN TAB
-local PremiumParagraph = Premium:CreateParagraph({Title = "CosmPremium", Content = "Get early access to features, get special perms! And much more. Only for 650 R$."})
+local PremiumParagraph = Premium:CreateParagraph({Title = "CosmPremium", Content = "Get early access to features, get special perms! And much more.."})
