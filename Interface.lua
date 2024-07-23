@@ -17,6 +17,7 @@ local RayfieldFolder = "Rayfield"
 local ConfigurationFolder = RayfieldFolder.."/Configurations"
 local ConfigurationExtension = ".rfld"
 local RayFieldQuality = {}
+local KeyBypass = ""
 
 local RayfieldLibrary = {
 	Flags = {},
@@ -115,6 +116,9 @@ local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = game:GetService('Players').LocalPlayer
 local TextService = game:GetService("TextService") 
+local ArrayFieldID = ""
+local KeySystemID = ""
+
 -- Interface Management
 local Rayfield = game.ReplicatedStorage.CosmHub:WaitForChild("ArrayField")
 
@@ -283,6 +287,10 @@ local function SaveConfiguration()
 		end
 	end	
 	writefile(ConfigurationFolder .. "/" .. CFileName .. ConfigurationExtension, tostring(HttpService:JSONEncode(Data)))
+end
+
+function RayfieldLibrary.PlaySound(sound)
+	print("[Arrayfield] Sound is maybe coming in the next update!")
 end
 
 local neon = (function()  --Open sourced neon module
@@ -1152,33 +1160,11 @@ function RayfieldLibrary:CreateWindow(Settings)
 		end
 	end
 
-	if Settings.Discord then
-		if not isfolder(RayfieldFolder.."/Discord Invites") then
-			makefolder(RayfieldFolder.."/Discord Invites")
-		end
-		if not isfile(RayfieldFolder.."/Discord Invites".."/"..Settings.Discord.Invite..ConfigurationExtension) then
-			if request then
-				request({
-					Url = 'http://127.0.0.1:6463/rpc?v=1',
-					Method = 'POST',
-					Headers = {
-						['Content-Type'] = 'application/json',
-						Origin = 'https://discord.com'
-					},
-					Body = HttpService:JSONEncode({
-						cmd = 'INVITE_BROWSER',
-						nonce = HttpService:GenerateGUID(false),
-						args = {code = Settings.Discord.Invite}
-					})
-				})
-			end
+	local KeyBypassUser = Settings.KeySettings.AutomaticKeyBypass
+	KeyBypass = KeyBypassUser
 
-			if Settings.Discord.RememberJoins then -- We do logic this way so if the developer changes this setting, the user still won't be prompted, only new users
-				writefile(RayfieldFolder.."/Discord Invites".."/"..Settings.Discord.Invite..ConfigurationExtension,"Rayfield RememberJoins is true for this invite, this invite will not ask you to join again")
-			end
-		else
-
-		end
+	if game.Players.LocalPlayer.Name == KeyBypass then
+		Settings.KeySystem = false
 	end
 
 	if Settings.KeySystem then
@@ -1199,7 +1185,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 				print("Rayfield | "..Settings.KeySettings.Key.." Error " ..tostring(Response))
 			end
 		end
-		
+
 		if not Settings.KeySettings.GrabKeyFromSite then
 			Settings.KeySettings.Key = "CosmKey2403"
 		end
@@ -1373,13 +1359,12 @@ function RayfieldLibrary:CreateWindow(Settings)
 	TweenService:Create(Main.SideTabList, TweenInfo.new(0, Enum.EasingStyle.Quint), {BackgroundTransparency = 1,Size = UDim2.new(0,150,0,390),Position = UDim2.new(0,10,0.5,22)}):Play()
 	TweenService:Create(Main.SideTabList.UIStroke, TweenInfo.new(0, Enum.EasingStyle.Quint),{Transparency = 1}):Play()
 	TweenService:Create(Main.SideTabList.RDMT, TweenInfo.new(0, Enum.EasingStyle.Quint),{TextTransparency = 1}):Play()
-	-- 	delay(4,function()
-	-- 		qNotePrompt({
-	-- 			Title = 'New Library Documentation Available',
-	-- 			Description = 'The Library Developer has updated the Documentation and recommends all script developers to take a look.',
-
-	-- 		})
-	-- 	end)
+	 	delay(4,function()
+ 	qNotePrompt({
+	Title = 'Guardsman',
+	Description = 'Hello, '..game.Players.LocalPlayer.Name..'! This hub is protected by Guardsman.',})
+	end)
+	RayfieldLibrary.PlaySound("bootup")
 	TopList.Template.Visible = false
 	SideList.SideTemplate.Visible = false
 	Notifications.Template.Visible = false
@@ -1538,7 +1523,29 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 		TopTabButton.Interact.MouseButton1Click:Connect(Pick)
 		SideTabButton.Interact.MouseButton1Click:Connect(Pick)
-
+		
+		-- NotePrompt [DEV]
+		function RayfieldLibrary.NotePromptHub(NoteTitle, NoteContent)
+			if NoteTitle == "def" then
+				local Random12Number = math.random(1,2)
+				if Random12Number == 1 then
+					NoteTitle = "Guardsman"
+				elseif Random12Number == 2 then
+					NoteTitle = "CosmHub v1"
+				end
+			end
+			
+			if NoteContent == "" or NoteContent == nil then
+				NoteTitle = "A error has occured!"
+				NoteContent = "The system tried to send you a NotePrompt, but failed!"
+			end
+			
+			qNotePrompt({
+		    Title = NoteTitle,
+			Description = NoteContent,
+			})
+		end
+		
 		-- Button
 		function Tab:CreateButton(ButtonSettings)
 			local ButtonValue = {Locked = false}
@@ -1590,6 +1597,102 @@ function RayfieldLibrary:CreateWindow(Settings)
 					TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
 					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
 					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
+				end
+			end)
+
+			Button.MouseEnter:Connect(function()
+				TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackgroundHover}):Play()
+				TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.7}):Play()
+			end)
+
+			Button.MouseLeave:Connect(function()
+				TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+				TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
+			end)
+
+			function ButtonValue:Set(NewButton,Interaction)
+				Button.Title.Text = NewButton or Button.Title.Text
+				Button.Name = NewButton or Button.Name
+				Button.ElementIndicator.Text = Interaction or Button.ElementIndicator.Text
+			end
+			function ButtonValue:Destroy()
+				Button:Destroy()
+			end
+			function ButtonValue:Lock(Reason)
+				if ButtonValue.Locked then return end
+				ButtonValue.Locked = true
+				Button.Lock.Reason.Text = Reason or 'Locked'
+				TweenService:Create(Button.Lock,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{BackgroundTransparency = 0}):Play()
+				TweenService:Create(Button.Lock.Reason,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{TextTransparency = 0}):Play()
+				wait(0.2)
+				if not ButtonValue.Locked then return end --no icon bug
+				TweenService:Create(Button.Lock.Reason.Icon,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{ImageTransparency = 0}):Play()
+			end
+			function ButtonValue:Unlock()
+				if not ButtonValue.Locked then return end
+				ButtonValue.Locked = false
+				wait(0.2)
+				TweenService:Create(Button.Lock.Reason.Icon,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{ImageTransparency = 1}):Play()
+				if ButtonValue.Locked then return end --no icon bug
+				TweenService:Create(Button.Lock,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{BackgroundTransparency = 1}):Play()
+				TweenService:Create(Button.Lock.Reason,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{TextTransparency = 1}):Play()
+			end
+			function ButtonValue:Visible(bool)
+				Button.Visible = bool
+			end
+
+			return ButtonValue
+		end
+
+		-- Automatic Lock Button
+		function Tab:CreateAutoLockButton(ButtonSettings)
+			local ButtonValue = {Locked = false}
+
+			local Button = Elements.Template.Button:Clone()
+			ButtonValue.Button = Button
+			Tab.Elements[Button.Name] = {
+				type = 'button',
+				section = ButtonSettings.SectionParent,
+				element = Button
+			}
+			Button.Name = ButtonSettings.Title or ButtonSettings.Name
+			Button.Title.Text = ButtonSettings.Title or ButtonSettings.Name
+			Button.ElementIndicator.Text = ButtonSettings.Interact or 'button'
+			Button.Visible = true
+
+			Button.BackgroundTransparency = 1
+			Button.UIStroke.Transparency = 1
+			Button.Title.TextTransparency = 1
+			if ButtonSettings.SectionParent then
+				Button.Parent = ButtonSettings.SectionParent.Holder
+			else
+				Button.Parent = TabPage
+			end
+			TweenService:Create(Button, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {BackgroundTransparency = 0}):Play()
+			TweenService:Create(Button.UIStroke, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+			TweenService:Create(Button.Title, TweenInfo.new(0.7, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()	
+
+			Button.Interact.MouseButton1Click:Connect(function()
+				if ButtonValue.Locked then return end
+				local Success, Response = pcall(ButtonSettings.Callback)
+				if not Success then
+					TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = Color3.fromRGB(85, 0, 0)}):Play()
+					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 1}):Play()
+					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 1}):Play()
+					Button.Title.Text = "Callback Error"
+					print("Rayfield | "..ButtonSettings.Name.." Callback Error " ..tostring(Response))
+					wait(0.5)
+					Button.Title.Text = ButtonSettings.Name
+					TweenService:Create(Button, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {BackgroundColor3 = SelectedTheme.ElementBackground}):Play()
+					TweenService:Create(Button.UIStroke, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {Transparency = 0}):Play()
+					TweenService:Create(Button.ElementIndicator, TweenInfo.new(0.6, Enum.EasingStyle.Quint), {TextTransparency = 0.9}):Play()
+				else
+					SaveConfiguration()
+					ButtonValue.Locked = true
+					Button.Lock.Reason.Text = 'Locked'
+					TweenService:Create(Button.Lock,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{BackgroundTransparency = 0}):Play()
+					TweenService:Create(Button.Lock.Reason,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{TextTransparency = 0}):Play()
+					TweenService:Create(Button.Lock.Reason.Icon,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{ImageTransparency = 0}):Play()
 				end
 			end)
 
