@@ -16,7 +16,8 @@ Content is required since it basically why you are sending a notification. There
 --]]
 
 -- LOADER
-local ArrayField = require(game.ReplicatedStorage.CosmHub.Interface)
+
+local ArrayField = loadstring(game:HttpGet('https://raw.githubusercontent.com/cosmservices/CosmHub/main/Interface.lua'))()
 local User = game.Players.LocalPlayer
 local UserNick = User.DisplayName
 local Username = User.Name
